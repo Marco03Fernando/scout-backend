@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'; // Import necessary tools from next/server
-import { OpenAI } from 'openai';
-import { inventory } from '@/lib/inventory';
-import { aiResponseSchema } from '@/lib/schema';
+import { OpenAI } from 'openai'; // OpenAI import
+import { inventory } from '@/lib/inventory'; // Assuming this exists
+import { aiResponseSchema } from '@/lib/schema'; // Assuming this exists
+import cors from 'cors';
 
 // Initialize OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!, // Ensure this API key is set in `.env.local`
+});
+
+// Enable CORS middleware for the frontend URL
+const corsHandler = cors({
+  origin: 'https://travel-front-alpha.vercel.app', // Frontend URL
+  methods: ['GET', 'POST'],
 });
 
 // POST method handler using NextResponse
