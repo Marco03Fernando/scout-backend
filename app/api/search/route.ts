@@ -2,22 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'; // Import necessary too
 import { OpenAI } from 'openai'; // OpenAI import
 import { inventory } from '@/lib/inventory'; // Assuming this exists
 import { aiResponseSchema } from '@/lib/schema'; // Assuming this exists
-import cors from 'cors';
 
 // Initialize OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!, // Ensure this API key is set in `.env.local`
 });
 
-// Enable CORS middleware for the frontend URL
-const corsHandler = cors({
-  origin: 'https://travel-front-alpha.vercel.app', // Frontend URL
-  methods: ['GET', 'POST'],
-});
-
 // POST method handler using NextResponse
 export async function POST(req: NextRequest) {
   try {
+    // Set CORS headers in the response directly
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
     // Parse the incoming JSON request body
     const { query } = await req.json();
 
