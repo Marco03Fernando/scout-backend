@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.next();
 
   // CORS Headers for preflight (OPTIONS) and actual requests (POST)
-  response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-  
+  response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');  // Allow requests from your frontend
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');  // Allow GET, POST, OPTIONS methods
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');  // Allow Content-Type header
+
   // Handle OPTIONS requests (preflight)
   if (req.method === 'OPTIONS') {
     console.log('CORS Preflight request received');
