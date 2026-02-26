@@ -8,6 +8,19 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!, // Ensure this API key is set in `.env.local`
 });
 
+// Handle OPTIONS (preflight) requests
+export async function OPTIONS(req: NextRequest) {
+  const response = NextResponse.next();
+
+  // CORS Headers for preflight (OPTIONS) and actual requests (POST)
+  response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');  // Allow requests from your frontend
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');  // Allow GET, POST, OPTIONS methods
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');  // Allow Content-Type header
+
+  console.log('CORS Preflight request received');
+  return response; // Respond with CORS headers for preflight requests
+}
+
 // POST method handler using NextResponse
 export async function POST(req: NextRequest) {
   const response = NextResponse.next();
@@ -16,12 +29,6 @@ export async function POST(req: NextRequest) {
   response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');  // Allow requests from your frontend
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');  // Allow GET, POST, OPTIONS methods
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');  // Allow Content-Type header
-
-  // Handle OPTIONS requests (preflight)
-  if (req.method === 'OPTIONS') {
-    console.log('CORS Preflight request received');
-    return response; // Respond with CORS headers for preflight requests
-  }
 
   try {
     // Log to check if request body is being parsed correctly
