@@ -10,18 +10,30 @@ const client = new OpenAI({
 
 // POST method handler using NextResponse
 export async function POST(req: NextRequest) {
-  try {
-    // Set CORS headers in the response directly
-    const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  const response = NextResponse.next();
 
+  // CORS Headers for preflight (OPTIONS) and actual requests (POST)
+  response.headers.set('Access-Control-Allow-Origin', 'https://travel-front-alpha.vercel.app');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle OPTIONS requests (preflight)
+  if (req.method === 'OPTIONS') {
+    console.log('CORS Preflight request received');
+    return response; // Respond with CORS headers for preflight requests
+  }
+
+  try {
+    // Log to check if request body is being parsed correctly
+    console.log('Request received');
+    
     // Parse the incoming JSON request body
     const { query } = await req.json();
+    console.log('Query:', query); // Log the received query
 
     // Return an empty response if there's no query
     if (!query || !query.trim()) {
+      console.log('No query provided or query is empty');
       return NextResponse.json({ matches: [] }, { status: 200 });
     }
 
@@ -42,6 +54,7 @@ export async function POST(req: NextRequest) {
       Inventory (ONLY source of truth):
       ${JSON.stringify(inventory)}
     `;
+    console.log('Sending request to OpenAI...'); // Log before sending request to OpenAI
 
     // Request OpenAI for the response
     const openaiRes = await client.chat.completions.create({
@@ -55,14 +68,17 @@ export async function POST(req: NextRequest) {
     });
 
     const raw = openaiRes.choices[0].message.content; // Get the raw response content
+    console.log('OpenAI Response:', raw); // Log OpenAI response
 
     // If there's no content, return empty matches
     if (!raw) {
+      console.log('No content in OpenAI response');
       return NextResponse.json({ matches: [] }, { status: 200 });
     }
 
     // Parse the response and validate using the schema
     const parsed = aiResponseSchema.parse(JSON.parse(raw));
+    console.log('Parsed response:', parsed); // Log parsed response
 
     // Filter invalid matches and merge with inventory details
     const safeMatches = parsed.matches
@@ -70,9 +86,10 @@ export async function POST(req: NextRequest) {
       .map((match) => ({ ...match, ...inventory.find((item) => item.id === match.id)! }));
 
     // Return the safe matches
+    console.log('Returning matches:', safeMatches);
     return NextResponse.json({ matches: safeMatches }, { status: 200 });
   } catch (e: any) {
-    console.error('OpenAI Search API error:', e);
+    console.error('OpenAI Search API error:', e); // Log any error in the console
     
     // Return error response if something goes wrong
     return NextResponse.json({
